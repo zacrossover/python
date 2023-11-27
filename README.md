@@ -19,6 +19,8 @@ $$ PR(p_i) = \sum_{p_j \in M(p_i)} \frac{PR(p_j)}{L(p_j)} $$
 
 页面的Pagerank就等于所有入链的分数总和。我们假设每个页面的分数是平均分配给所有出链的，令所有页面的总分数都是1，为各边加权，可以得到下图：
 
+![pagerank](https://github.com/zacrossover/python/assets/15845563/9af78cc6-ad93-49be-850f-311fb3b194f2)
+
 ![pagerank2](https://github.com/zacrossover/python/assets/15845563/5f9e4ecf-eb88-43bb-a192-11fadf0e7d67)
 
 根据上述加权有向图可以转成一个矩阵，元素的值代表从一个页面到另一个页面的投票
