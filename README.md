@@ -132,7 +132,7 @@ pagerank1 = nx.pagerank(G,
 
 其中alpha参数代表阻尼系数，这里取0.85，最大迭代次数取100，收敛的误差 $\epsilon$ 取 $10^{-6}$ 。
 
-代码执行过程中取两个数据集，小的数据集为三国演义的人物关系(data/三国演义/triples.csv)，该图包括123个节点和144条边；大数据集是一个网上找的节点数据集（/data/web_Google.txt），包括875713个节点和5105039条边。这两个数据集均在data文件夹下。分别对其读取，生成有向图，调用函数，排序，并按顺序输出pagerank最大的若干个节点，代码如下：
+代码执行过程中取两个数据集，小的数据集为三国演义的人物关系(data/三国演义/triples.csv)，该图包括123个节点和144条边；大数据集是2002年谷歌编程大赛的一个有向图数据集（/data/web_Google.txt），包括875713个节点和5105039条边。这两个数据集均在data文件夹下。分别对其读取，生成有向图，调用函数，排序，并按顺序输出pagerank最大的若干个节点，代码如下：
 ```python
 df = pd.read_csv('data/三国演义/triples.csv')
 edges = [edge for edge in zip(df['head'], df['tail'])]
@@ -179,4 +179,17 @@ print(top10)
 ![image](https://github.com/zacrossover/python/assets/15845563/7b7d4115-c492-4c4a-9ffc-1e8f1cb41cc1)
 
 可以看到大数据集执行花费12.8秒，而小数据集花费0.6秒。小数据集中，诸葛亮的pagerank值最高，符合常识；大数据集中，163075号节点pagerank值最高，说明该节点最为重要。
+
+
+## 算法缺陷
+
+
+PageRank算法的主要缺点在于旧的页面的排名往往会比新页面高。因为即使是质量很高的新页面也往往不会有很多外链，除非它是某个已经存在站点的子站点。这也是PageRank需要多项算法结合以保证其结果的准确性的原因。例如，PageRank似乎偏好于维基百科页面，在条目名称的搜索结果中，维基百科页面经常在大多数页面甚至所有页面之前，此现象的原因则是维基百科内部网页中存在大量的内链，同时亦有很多站点链入维基百科。
+
+
+## 引用
+
+https://www.cnblogs.com/jpcflyer/p/11180263.html
+
+https://zh.wikipedia.org/wiki/PageRank
 
