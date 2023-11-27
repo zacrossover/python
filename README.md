@@ -29,9 +29,40 @@ $$
 
 之后我们假设四个网页初始的pagerank相同，可以得到下面的向量w_0
 
+$$w_0=
+\begin{bmatrix}
+1/4 \\
+1/4 \\
+1/4 \\
+1/4
+\end{bmatrix}
+$$
+
 ![image](https://github.com/zacrossover/python/assets/15845563/b90c33b2-7a0b-4abc-bb19-482eb8c4a966)
 
-对初始的pagerank进行第一次迭代极端，相当于对上面向量根据投票的矩阵进行线性变换，可以得到w_1
+对初始的pagerank进行第一次迭代，相当于对上面向量根据投票的矩阵进行线性变换，可以得到w_1
+
+$$w_1 = Mw_0 = \left[
+ \begin{matrix}
+0 & 1/2 & 1 & 0 \\
+1/3 & 0 & 0 & 1/2 \\
+1/3 & 0 & 0 & 1/2 \\
+1/3 & 1/2 & 0 & 0 
+  \end{matrix}
+  \right] \left[
+ \begin{matrix}
+1/4 \\
+1/4 \\
+1/4 \\
+1/4
+  \end{matrix}
+  \right] =  \begin{matrix}
+3/8 \\
+5/24 \\
+5/24 \\
+5/24
+  \end{matrix}$$
+
 
 ![image](https://github.com/zacrossover/python/assets/15845563/1805ea1e-4479-4c53-81df-f2276f1ff13a)
 
