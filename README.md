@@ -100,7 +100,7 @@ $$\begin{bmatrix}
 0.2222
   \end{bmatrix}$$
 
-上面过程相当于不断的对初始向量w_0做左乘矩阵M的操作，当上一次的结果w_i于w_i+1的差小于一个 $\epsilon$ 时，迭代结束，得到的向量w_i+1即为最终的pagerank值。
+上面过程相当于不断的对初始向量w_0做左乘矩阵M的操作，当上一次的结果w_i于w_i+1的差小于一个 $\epsilon$ 时，迭代结束，得到的向量w_i+1即为最终的pagerank值，改方法叫幂迭代。
 
 但在现实情况中，可能存在某些页面没有向外的链接，那经过迭代之后，这个页面的pagerank将变为1，其他页面都为0；或者某些页面没有访问它的页面，那它的pagerank将是0，这些结果都是没有意义的。为了解决这个问题，该算法引入了随机浏览者（random surfer）的概念，即假设某人在浏览器中随机打开某些页面并点击了某些链接。为了便于理解，这里假设上网者不断点击网页上的链接直到进入一个没有外部链接的网页，此时他会随机浏览其他的网页（可以与之前的网页无关）。为了表达这种概率，引入一个阻尼系数d，表示用户与1-d的概率停止继续点击链接，随机浏览网页，pagerank的公式就变为 
 
@@ -117,5 +117,66 @@ $$ O(t(\varepsilon)n^2) $$
 
 ## 代码实现
 
-https://www.cnblogs.com/jpcflyer/p/11180263.html
-https://mahua.jser.me/
+代码实现方面，使用python的图数据挖掘包networkx。networkx可以以标准化和非标准化的数据格式存储网络、生成多种随机网络和经典网络、分析网络结构、建立网络模型、设计新的网络算法、进行网络绘制等。其中实现了Pagerank相关算法，可直接调用。
+
+```python
+pagerank1 = nx.pagerank(G,
+                       alpha=0.85,            # Damping Factor
+                       personalization=None,  # 是否开启Personalized PageRank，随机传送至指定节点集合的概率更高或更低
+                       max_iter=100,          # 最大迭代次数
+                       tol=1e-06,             # 判定收敛的误差
+                       nstart=None,           # 每个节点初始PageRank值
+                       dangling=None,         # Dead End死胡同节点
+                      )
+```
+
+其中alpha参数代表阻尼系数，这里取0.85，最大迭代次数取100，收敛的误差 $\epsilon$ 取 $10^{-6}$ 。
+
+代码执行过程中取两个数据集，小的数据集为三国演义的人物关系(data/三国演义/triples.csv)，该图包括123个节点和144条边；大数据集是一个网上找的节点数据集（/data/web_Google.txt），包括875713个节点和5105039条边。这两个数据集均在data文件夹下。分别对其读取，生成有向图，调用函数，排序，并按顺序输出pagerank最大的若干个节点，代码如下：
+```python
+df = pd.read_csv('data/三国演义/triples.csv')
+edges = [edge for edge in zip(df['head'], df['tail'])]
+
+G = nx.DiGraph()
+G.add_edges_from(edges)
+
+start_time = time.time()
+pagerank1 = nx.pagerank(G,
+                       alpha=0.85,            # Damping Factor
+                       personalization=None,  # 是否开启Personalized PageRank，随机传送至指定节点集合的概率更高或更低
+                       max_iter=100,          # 最大迭代次数
+                       tol=1e-06,             # 判定收敛的误差
+                       nstart=None,           # 每个节点初始PageRank值
+                       dangling=None,         # Dead End死胡同节点
+                      )
+end_time = time.time()
+
+print("程序运行时间为：", end_time-start_time)
+sorted1 = sorted(pagerank1.items(),key=lambda x : x[1], reverse=True)
+print(sorted1)
+
+G_tmp = nx.read_edgelist('data/web-Google.txt', create_using = nx.DiGraph)
+print(len(G_tmp))
+start_time2 = time.time()
+pagerank2 = nx.pagerank(G_tmp,                     # NetworkX graph 有向图，如果是无向图则自动转为双向有向图
+                       alpha=0.85,            # Damping Factor
+                       personalization=None,  # 是否开启Personalized PageRank，随机传送至指定节点集合的概率更高或更低
+                       max_iter=100,          # 最大迭代次数
+                       tol=1e-06,             # 判定收敛的误差
+                       nstart=None,           # 每个节点初始PageRank值
+                       dangling=None,         # Dead End死胡同节点
+                      )
+end_time2 = time.time()
+print("程序运行时间为：", end_time2-start_time2)
+
+sorted2 = sorted(pagerank2.items(),key=lambda x : x[1], reverse=True)
+top10 = sorted2[:10]
+print(top10)
+```
+
+输出的截图如下：
+
+![image](https://github.com/zacrossover/python/assets/15845563/7b7d4115-c492-4c4a-9ffc-1e8f1cb41cc1)
+
+可以看到大数据集执行花费12.8秒，而小数据集花费0.6秒。小数据集中，诸葛亮的pagerank值最高，符合常识；大数据集中，163075号节点pagerank值最高，说明该节点最为重要。
+
