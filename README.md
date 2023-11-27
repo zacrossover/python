@@ -18,13 +18,15 @@
 
 ![image](https://github.com/zacrossover/python/assets/15845563/73ccd92a-76a6-4df9-8551-dabbadb16076)
 
-之后我们假设四个网页初始的影响力相同，可以得到下面的向量
+之后我们假设四个网页初始的pagerank相同，可以得到下面的向量w_0
 
 ![image](https://github.com/zacrossover/python/assets/15845563/b90c33b2-7a0b-4abc-bb19-482eb8c4a966)
 
-对初始影响力
+对初始的pagerank进行第一次迭代极端，相当于对上面向量根据投票的矩阵进行线性变换，可以得到w_1
 
+![image](https://github.com/zacrossover/python/assets/15845563/1805ea1e-4479-4c53-81df-f2276f1ff13a)
 
+再对w_1进行投票，以此类推，网页的pagerank向量w将最终收敛，相当于不断的对初始向量w_0做左乘矩阵M的操作，当上一次的结果w_i于w_i+1的差小于一个\epsilon时，迭代结束，得到的向量w_i+1即为最终的pagerank值。
 
 ## 时间复杂度分析
 
