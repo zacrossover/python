@@ -21,9 +21,8 @@ $$ PR(p_i) = \sum_{p_j \in M(p_i)} \frac{PR(p_j)}{L(p_j)} $$
 
 ![pagerank](https://github.com/zacrossover/python/assets/15845563/9af78cc6-ad93-49be-850f-311fb3b194f2)
 
-![pagerank2](https://github.com/zacrossover/python/assets/15845563/5f9e4ecf-eb88-43bb-a192-11fadf0e7d67)
 
-根据上述加权有向图可以转成一个矩阵，元素的值代表从一个页面到另一个页面的投票
+根据上述加权有向图可以转成一个转移矩阵，元素的值代表从一个页面到另一个页面的投票
 
 $$M=
 \begin{bmatrix}
@@ -134,6 +133,59 @@ pagerank1 = nx.pagerank(G,
 
 其中alpha参数代表阻尼系数，这里取0.85，最大迭代次数取100，收敛的误差 $\epsilon$ 取 $10^{-6}$ 。
 
+查看函数源代码，逻辑为幂迭代，不断左乘转移矩阵，在差值小于tol时返回。
+```python
+    import numpy as np
+    import scipy as sp
+
+    N = len(G)
+    if N == 0:
+        return {}
+
+    nodelist = list(G)
+    A = nx.to_scipy_sparse_array(G, nodelist=nodelist, weight=weight, dtype=float)
+    S = A.sum(axis=1)
+    S[S != 0] = 1.0 / S[S != 0]
+    # TODO: csr_array
+    Q = sp.sparse.csr_array(sp.sparse.spdiags(S.T, 0, *A.shape))
+    A = Q @ A
+
+    # initial vector
+    if nstart is None:
+        x = np.repeat(1.0 / N, N)
+    else:
+        x = np.array([nstart.get(n, 0) for n in nodelist], dtype=float)
+        x /= x.sum()
+
+    # Personalization vector
+    if personalization is None:
+        p = np.repeat(1.0 / N, N)
+    else:
+        p = np.array([personalization.get(n, 0) for n in nodelist], dtype=float)
+        if p.sum() == 0:
+            raise ZeroDivisionError
+        p /= p.sum()
+    # Dangling nodes
+    if dangling is None:
+        dangling_weights = p
+    else:
+        # Convert the dangling dictionary into an array in nodelist order
+        dangling_weights = np.array([dangling.get(n, 0) for n in nodelist], dtype=float)
+        dangling_weights /= dangling_weights.sum()
+    is_dangling = np.where(S == 0)[0]
+
+    # power iteration: make up to max_iter iterations
+    for _ in range(max_iter):
+        xlast = x
+        x = alpha * (x @ A + sum(x[is_dangling]) * dangling_weights) + (1 - alpha) * p
+        # check convergence, l1 norm
+        err = np.absolute(x - xlast).sum()
+        if err < N * tol:
+            return dict(zip(nodelist, map(float, x)))
+    raise nx.PowerIterationFailedConvergence(max_iter)
+```
+
+
 代码执行过程中取两个数据集，小的数据集为三国演义的人物关系(data/三国演义/triples.csv)，该图包括123个节点和144条边；大数据集是2002年谷歌编程大赛的一个有向图数据集（/data/web_Google.txt），包括875713个节点和5105039条边。这两个数据集均在data文件夹下。分别对其读取，生成有向图，调用函数，排序，并按顺序输出pagerank最大的若干个节点，代码如下：
 ```python
 df = pd.read_csv('data/三国演义/triples.csv')
@@ -189,7 +241,7 @@ print(top10)
 PageRank算法的主要缺点在于旧的页面的排名往往会比新页面高。因为即使是质量很高的新页面也往往不会有很多外链，除非它是某个已经存在站点的子站点。这也是PageRank需要多项算法结合以保证其结果的准确性的原因。例如，PageRank似乎偏好于维基百科页面，在条目名称的搜索结果中，维基百科页面经常在大多数页面甚至所有页面之前，此现象的原因则是维基百科内部网页中存在大量的内链，同时亦有很多站点链入维基百科。
 
 
-## 引用
+## 参考资料
 
 https://www.cnblogs.com/jpcflyer/p/11180263.html
 
