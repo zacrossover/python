@@ -15,6 +15,15 @@
 ![pagerank2](https://github.com/zacrossover/python/assets/15845563/5f9e4ecf-eb88-43bb-a192-11fadf0e7d67)
 
 根据上述加权有向图可以转成一个矩阵，元素的值代表从一个页面到另一个页面的投票
+$$M=
+\begin{bmatrix}
+0 & 1/2 & 1 & 0 \\
+1/3 & 0 & 0 & 1/2 \\
+1/3 & 0 & 0 & 1/2 \\
+1/3 & 1/2 & 0 & 0 
+\end{bmatrix}
+$$
+
 
 ![image](https://github.com/zacrossover/python/assets/15845563/73ccd92a-76a6-4df9-8551-dabbadb16076)
 
@@ -27,6 +36,16 @@
 ![image](https://github.com/zacrossover/python/assets/15845563/1805ea1e-4479-4c53-81df-f2276f1ff13a)
 
 再对w_1进行投票，以此类推，网页的pagerank向量w将最终收敛，相当于不断的对初始向量w_0做左乘矩阵M的操作，当上一次的结果w_i于w_i+1的差小于一个\epsilon时，迭代结束，得到的向量w_i+1即为最终的pagerank值。
+
+$$
+\begin{bmatrix}
+1 & 2 & 3 \\
+4 & 5 & 6 \\
+7 & 8 & 9
+\end{bmatrix}
+$$
+
+
 
 ## 时间复杂度分析
 
